@@ -231,7 +231,7 @@ PyGccGimple_get_block(struct PyGccGimple *self, void *closure)
                           tp_str = '(reprfunc)PyGccGimple_str',
                           tp_hash = '(hashfunc)PyGccGimple_hash',
                           tp_richcompare = 'PyGccGimple_richcompare',
-                          tp_flags = 'Py_TPFLAGS_BASETYPE',
+                          tp_flags = '(Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE)',
                           )
     methods = PyMethodTable('PyGccGimple_methods', [])
     methods.add_method('walk_tree',

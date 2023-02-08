@@ -57,7 +57,7 @@ int plugin_is_GPL_compatible;
 #include "c-pragma.h" /* for parse_in */
 #endif
 
-#if 0
+#if 1
 #define LOG(msg) \
     (void)fprintf(stderr, "%s:%i:%s\n", __FILE__, __LINE__, (msg))
 #else
@@ -758,6 +758,21 @@ on_plugin_finish(void *gcc_data, void *user_data)
     Py_Finalize();
 }
 
+
+bool
+plugin_cross_version_check (struct plugin_gcc_version *gcc_version,
+			      struct plugin_gcc_version *plugin_version)
+{
+  if (!gcc_version || !plugin_version)
+    return false;
+
+  if (strcmp (gcc_version->basever, plugin_version->basever))
+    return false;
+  if (strcmp (gcc_version->datestamp, plugin_version->datestamp))
+    return false;
+  return true;
+}
+
 extern int
 plugin_init (struct plugin_name_args *plugin_info,
              struct plugin_gcc_version *version) __attribute__((nonnull));
@@ -768,8 +783,15 @@ plugin_init (struct plugin_name_args *plugin_info,
 {
     LOG("plugin_init started");
 
-    if (!plugin_default_version_check (version, &gcc_version)) {
-        return 1;
+    if (!plugin_cross_version_check (version, &gcc_version)) {
+        fprintf(stderr,"version mismatch!\n");
+        fprintf(stderr,"field\t\tPLUGIN\t\tGCC\n");
+        fprintf(stderr,"basever\t\t%s\t\t%s\n", version->basever, gcc_version.basever);
+        fprintf(stderr,"datestamp\t%s\t%s\n", version->datestamp, gcc_version.datestamp);
+        fprintf(stderr,"devphase\t%s\t%s\n", version->devphase, gcc_version.devphase);
+        fprintf(stderr,"revision\t%s\t%s\n", version->revision, gcc_version.revision);
+        fprintf(stderr,"PLUGIN configuration_arguments: %s\nGCC configuration_arguments: %s\n", version->configuration_arguments, gcc_version.configuration_arguments);
+        return 1;        
     }
 
 #if PY_MAJOR_VERSION >= 3
